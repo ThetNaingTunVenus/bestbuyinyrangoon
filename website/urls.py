@@ -1,5 +1,7 @@
 from django.urls import path
-app_name = 'barcode'
+from .views import *
+from . import views
+app_name = 'shop'
 urlpatterns = [
-    # path(''),
+    path('', TestView.as_view()),
 ]
