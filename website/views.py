@@ -8,4 +8,4 @@ class TestView(View):
     def get(self,request):
         it = Items.objects.all()
         context = {'it':it}
-        return render(request,'shop/test.html',context)
+        return render(request,'shop/index.html',context)
