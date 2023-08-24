@@ -44,7 +44,7 @@ urlpatterns = [
     path('ExpenseReportFilter/', ExpenseReportFilter.as_view(), name='ExpenseReportFilter'),
     path('LedgerCreateView/', LedgerCreateView.as_view(), name='LedgerCreateView'),
 
-    path('', DashboardView.as_view(), name='DashboardView'),
+    path('dashboard/', DashboardView.as_view(), name='DashboardView'),
     # path('DashboardReportView/', DashboardReportView, name='DashboardReportView'),
     path('testbarcode/', testbarcode.as_view(), name='testbarcode'),
     path('DeliveryView', DeliveryView.as_view(), name= 'DeliveryView'),
@@ -52,5 +52,9 @@ urlpatterns = [
 
     path('TestFilter/', TestFilter.as_view(), name='TestFilter'),
 
+    #for website
+    path('', WebsiteView.as_view(), name='WebsiteView'),
+
 
 ]
+

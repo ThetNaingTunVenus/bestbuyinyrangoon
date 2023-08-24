@@ -1092,6 +1092,17 @@ class TestFilter(View):
         ordr = Order.objects.all()
         cp = CartProduct.objects.all()
         ca = Cart.objects.all()
-        context = {'ordr':ordr, 'cp':cp, 'ca':ca}
+        women = 1
+        print(women)
+        context = {'ordr':ordr, 'cp':cp, 'ca':ca, 'women':women}
         return render(request, 'shop/test.html', context)
 
+
+
+#for website
+class WebsiteView(View):
+    def get(self, request):
+        itm = Items.objects.all()
+        cat = Category.objects.all()
+        context = {'itm':itm, 'cat':cat}
+        return render(request,'shop/index.html',context)
