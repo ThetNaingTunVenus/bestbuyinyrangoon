@@ -50,5 +50,7 @@ urlpatterns = [
     path('DeliveryView', DeliveryView.as_view(), name= 'DeliveryView'),
     path('pdf_invoice_create/<int:id>/', pdf_invoice_create, name='pdf_invoice_create'),
 
+    path('TestFilter/', TestFilter.as_view(), name='TestFilter'),
+
 
 ]

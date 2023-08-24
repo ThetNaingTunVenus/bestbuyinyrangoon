@@ -6,8 +6,10 @@
     <title>Document</title>
 </head>
 <body>
-    {% for i in it%}
-    <li>{{i.item_name}}</li>
+   
+    {% for i in ordr%}
+    <li>{{i.cart.total}}</li>
     {% endfor %}
+
 </body>
 </html>

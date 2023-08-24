@@ -1086,4 +1086,12 @@ class DeliveryView(View):
             return render(request, 'delivery_view.html', context)
 
 
+#test_for_deshboard
+class TestFilter(View):
+    def get(self, request):
+        ordr = Order.objects.all()
+        cp = CartProduct.objects.all()
+        ca = Cart.objects.all()
+        context = {'ordr':ordr, 'cp':cp, 'ca':ca}
+        return render(request, 'shop/test.html', context)
 
