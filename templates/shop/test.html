@@ -12,6 +12,12 @@
     <img src="{{i.barcode.url}}">
     {% endfor %}
 
+    {% for i in ordr.cart.cartproduct_set.all() %}
+    <li>
+        {{i.id}}
+    </li>
+    {%endfor%}
+
 
 
 </body>

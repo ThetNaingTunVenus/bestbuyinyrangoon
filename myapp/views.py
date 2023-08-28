@@ -997,11 +997,6 @@ class DashboardView(UserRequiredMixin,View):
         exp_total = ExpenseReport.objects.filter(expense_date__range=[first_date, today],expense_type=expense_type).aggregate(Sum('amount'))['amount__sum']
         purchase_total = PurchaseList.objects.filter(created_date__range=[first_date, today]).aggregate(Sum('total_purchase_price'))['total_purchase_price__sum']
 
-        # item_list = Items.objects.all()
-        # paginator = Paginator(item_list, 3)  # Show 10 contacts per page.
-        #
-        # page_number = request.GET.get("page")
-        # page_obj = paginator.get_page(page_number)
 # chart data
         purchasedata = PurchaseList.objects.all()
         c_product = CartProduct.objects.values('product__item_name','product__sell_price','product__balance_qty','product__pruchase_price').annotate(sum=Sum('subtotal'),quantity=Sum('quantity'),pur=(F('product__sell_price')-F('product__pruchase_price'))*F('quantity')).filter(created_at__range=[first_date, today])
@@ -1019,7 +1014,12 @@ class DashboardView(UserRequiredMixin,View):
         total_sale_amt = c_product.aggregate(Sum('subtotal'))['subtotal__sum']
         total_sale_qty = c_product.aggregate(Sum('quantity'))['quantity__sum']
 
-        # print(total_sale_qty)
+        # test
+        odr = Order.objects.all()
+        itm = Items.objects.all()
+        # t_sale_amt = Order.objects.filter(created_at=)
+
+
 
         context = {'c_product':c_product,
                    'sale_total':sale_total,
@@ -1031,6 +1031,7 @@ class DashboardView(UserRequiredMixin,View):
                    'total_sale_amt':total_sale_amt,
                    'total_sale_qty':total_sale_qty,
                    # 'page_obj':page_obj,
+                   'odr':odr,'itm':itm,
                    }
 
         return render(request, 'dashboard.html', context)
@@ -1053,11 +1054,18 @@ class DashboardView(UserRequiredMixin,View):
             gp_total = c_product.aggregate(
                 gp=Sum((F('product__sell_price') - F('product__pruchase_price')) * F('quantity')))
             total_sale_amt = c_product.aggregate(Sum('subtotal'))['subtotal__sum']
+            sale_total = Order.objects.filter(created_at__range=[fromdate, todate]).aggregate(Sum('all_total'))['all_total__sum']
+            #second for filter --cart.cartproduct_set.filter(product = product_obj)
+            odr = Order.objects.all()
+            itm = Items.objects.all()
+
             context = {'c_product': c_product,
                        'gp_total': gp_total,
                        'total_sale_amt': total_sale_amt,
                        'message':message,
                        # 'page_obj':page_obj,
+                       'odr':odr,'itm':itm,
+                       'sale_total':sale_total,
                        }
             return render(request, 'dashboard.html', context)
         else:
@@ -1096,6 +1104,12 @@ class TestFilter(View):
         print(women)
         context = {'ordr':ordr, 'cp':cp, 'ca':ca, 'women':women}
         return render(request, 'shop/test.html', context)
+
+#cart_obj = Cart.objects.get(id= cart_id)
+           # this_product_in_cart = cart_obj.cartproduct_set.filter(product = product_obj)
+            #Product already exists in cart
+
+
 
 
 
