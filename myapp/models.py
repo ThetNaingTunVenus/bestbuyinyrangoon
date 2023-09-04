@@ -36,6 +36,14 @@ class Items(models.Model):
     def __str__(self):
         return self.item_name
 
+class PromotionItem(models.Model):
+    item_name = models.CharField(max_length=225)
+    price = models.CharField(max_length=225)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    promo_img = models.ImageField(upload_to='promotion/', blank=True)
+
+
 class Cart(models.Model):
     staff = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     total = models.PositiveIntegerField(default=0)
