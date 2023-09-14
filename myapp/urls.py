@@ -54,6 +54,9 @@ urlpatterns = [
 
     #for website
     path('', WebsiteView.as_view(), name='WebsiteView'),
+    path('WebSaleOrder/<int:pro_id>', WebSaleOrder.as_view(), name='WebSaleOrder'),
+    path('CartItemRemoveView/<int:cp_id>/', CartItemRemoveView.as_view(), name='CartItemRemoveView'),
+    path('WebsiteCheckoutView/', WebsiteCheckoutView.as_view(), name='WebsiteCheckoutView'),
 
 
 ]

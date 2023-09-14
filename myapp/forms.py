@@ -29,6 +29,7 @@ class CheckoutForm(forms.ModelForm):
         }
 
 
+
 class AdminProductEditForm(forms.ModelForm):
     class Meta:
         model = Items
@@ -78,3 +79,23 @@ class PurchaseDataDeleteFrom(forms.ModelForm):
             'item_name': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'True'}),
             'purchase_qty': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'True'}),
         }
+
+
+class WebsiteCheckoutForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['ordered_by', 'mobile', 'shipping_address']
+        widgets = {
+            'ordered_by': forms.TextInput(attrs={'class': 'form-control'}),
+            'mobile': forms.TextInput(attrs={'class': 'form-control'}),
+            'shipping_address': forms.Textarea(attrs={'class': 'form-control'}),
+            # 'delivery_fee': forms.NumberInput(attrs={'class':'form-control col-md-6'}),
+            # 'discount': forms.NumberInput(attrs={'class': 'form-control col-md-4'}),
+            # 'payment': forms.Select(attrs={'class': 'form-control col-md-6'}),
+            # 'delivery_system': forms.Select(attrs={'class': 'form-control col-md-6'}),
+            # 'deli_payment':forms.BooleanField(),
+
+            # 'id':forms.Textarea
+
+        }
+

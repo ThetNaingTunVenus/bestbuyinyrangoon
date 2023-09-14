@@ -1118,5 +1118,169 @@ class WebsiteView(View):
     def get(self, request):
         itm = Items.objects.all()
         cat = Category.objects.all()
-        context = {'itm':itm, 'cat':cat}
+        cart_id = self.request.session.get('cart_id', None)
+        if cart_id:
+            cart = Cart.objects.get(id=cart_id)
+        else:
+            cart = None
+        context = {'itm':itm, 'cat':cat, 'cart':cart}
         return render(request,'shop/index.html',context)
+
+class WebSaleOrder(TemplateView):
+    template_name = 'shop/index.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+    #     # prouduct id get from request url
+        product_id = self.kwargs['pro_id']
+
+        # get product
+        product_obj = Items.objects.get(id=product_id)
+
+
+        # check it cart exist
+        cart_id = self.request.session.get("cart_id", None)
+        if cart_id:
+            cart_obj = Cart.objects.get(id=cart_id)
+            this_product_in_cart = cart_obj.cartproduct_set.filter(product=product_obj)
+            # Product already exists in cart
+            if this_product_in_cart.exists():
+                cartproduct = this_product_in_cart.last()
+                cartproduct.quantity += 1
+                cartproduct.subtotal += product_obj.sell_price
+                cartproduct.remain_balance -=1
+
+                cartproduct.save()
+                cart_obj.total += product_obj.sell_price
+                cart_obj.tax = cart_obj.total * 0.00
+                cart_obj.super_total = cart_obj.tax + cart_obj.total
+                cart_obj.save()
+                cartproduct_balance = cartproduct.remain_balance
+                print('update')
+                item_update = Items.objects.filter(id=product_id).update(balance_qty=cartproduct_balance)
+            # New item added in cart
+            else:
+                item_filter = Items.objects.filter(id=product_id)
+                balance_filter = item_filter[0].balance_qty
+                qty_balance = 1
+                cartproduct_balance = int(balance_filter) - int(qty_balance)
+                item_update = Items.objects.filter(id=product_id)
+                item_update.update(balance_qty=cartproduct_balance)
+                # print('success !!!!!!')
+                cartproduct = CartProduct.objects.create(cart=cart_obj, product=product_obj,
+                                                         rate=product_obj.sell_price, quantity=1,
+                                                         subtotal=product_obj.sell_price,remain_balance=cartproduct_balance)
+
+                # item_update = Items.objects.filter(id=product_id).update(balance_qty=cartproduct_balance)
+
+
+                cart_obj.total += product_obj.sell_price
+                cart_obj.tax = cart_obj.total * 0.00
+                cart_obj.super_total = cart_obj.tax + cart_obj.total
+                cart_obj.save()
+        else:
+            cart_obj = Cart.objects.create(total=0)
+            self.request.session['cart_id'] = cart_obj.id
+            item_filter = Items.objects.filter(id=product_id)
+            balance_filter = item_filter[0].balance_qty
+            qty_balance = 1
+            cartproduct_balance = int(balance_filter) - int(qty_balance)
+            cartproduct = CartProduct.objects.create(cart=cart_obj, product=product_obj, rate=product_obj.sell_price,
+                                                     quantity=1, subtotal=product_obj.sell_price,remain_balance=cartproduct_balance)
+
+            item_update = Items.objects.filter(id=product_id)
+            item_update.update(balance_qty=cartproduct_balance)
+
+            cart_obj.total += product_obj.sell_price
+            cart_obj.tax = cart_obj.total * 0.00
+            # print('succ')
+            cart_obj.super_total = cart_obj.tax + cart_obj.total
+            cart_obj.save()
+
+    #     # if product already exist
+        context['itm'] = Items.objects.all().order_by('-id')
+        # context['cart'] = Cart.objects.get(id=cart_id)
+        context['cat'] = Category.objects.all()
+        cart_id = self.request.session.get('cart_id', None)
+        if cart_id:
+            cart = Cart.objects.get(id=cart_id)
+        else:
+            cart = None
+        context['cart'] = cart
+        # context[itm] = Items.objects.all()
+        # context[cat] = Category.objects.all()
+        return context
+
+class CartItemRemoveView(View):
+    def get(self, request, *args, **kwargs):
+
+        cp_id = kwargs['cp_id']
+        action = request.GET.get('action')
+        cp_obj = CartProduct.objects.get(id=cp_id)
+        cart_obj = cp_obj.cart
+
+        if action == 'rmv':
+            cart_obj.total -= cp_obj.subtotal
+            # cp_obj.remain_balance += cp_obj.quantity
+            # item_balance = cp_obj.remain_balance +cp_obj.quantity
+
+            # item_update = Items.objects.filter(id=cp_obj.product.id).update(balance_qty=item_balance)
+            cart_obj.tax = cart_obj.total * 0.00
+            cart_obj.super_total = cart_obj.tax + cart_obj.total
+            cart_obj.save()
+            cp_obj.delete()
+        else:
+            pass
+        return redirect('myapp:WebsiteView')
+
+class WebsiteCheckoutView(CreateView):
+    template_name = 'shop/check.html'
+    form_class = WebsiteCheckoutForm
+    success_url = reverse_lazy('myapp:WebsiteView')
+
+    # def dispatch(self, request, *args, **kwargs):
+    #     if request.user.is_authenticated and request.user.customer:
+    #         print('login....')
+    #     else:
+    #         return redirect('/login/?next=/checkout/')
+    #     return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart_id = self.request.session.get("cart_id", None)
+        if cart_id:
+            cart_obj = Cart.objects.get(id=cart_id)
+        else:
+            cart_obj = None
+        context['cart'] = cart_obj
+        # print(cart_id)
+        return context
+    
+    def form_valid(self, form):
+        cart_id = self.request.session.get('cart_id')
+        # print(form.instance.delivery_fee)
+        deli = 0
+        dis = 0
+        if cart_id:
+            cart_obj = Cart.objects.get(id=cart_id)
+            form.instance.cart = cart_obj
+            form.instance.subtotal = 0
+            # form.instance.discount = 0
+            form.instance.total = cart_obj.total
+
+            form.instance.ordered_staus = 'Ordering'
+            form.instance.tax = cart_obj.tax
+            form.instance.all_total = cart_obj.super_total
+            total_deli = deli + cart_obj.super_total - dis
+            form.instance.all_total_delivery = total_deli
+
+            del self.request.session['cart_id']
+        else:
+            return redirect('myapp:MyCartView')
+        return super().form_valid(form)
+
+    # def form_valid(self, form):
+    #     cart_id = self.request.session.get('cart_id')
+    #     print(cart_id)
+    #     return HttpResponse('success')
+        
