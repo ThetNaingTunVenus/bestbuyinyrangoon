@@ -2,3 +2,5 @@
 Add Index.html
 add model to promotion table
 
+change for web
+
